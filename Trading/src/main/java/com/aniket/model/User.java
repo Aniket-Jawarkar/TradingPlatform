@@ -4,7 +4,7 @@ package com.aniket.model;
 import com.aniket.domain.USER_ROLE;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
-import lombok.Data;
+
 
 import java.util.Objects;
 
@@ -28,6 +28,18 @@ public class User {
 
     private USER_ROLE role = USER_ROLE.ROLE_CUSTOMER;
 
+
+    public User(Long id, String fullName, String email, String password, TwoFactorAuth twoFactorAuth, USER_ROLE role) {
+        this.id = id;
+        this.fullName = fullName;
+        this.email = email;
+        this.password = password;
+        this.twoFactorAuth = twoFactorAuth;
+        this.role = role;
+    }
+
+    public User() {
+    }
 
     public Long getId() {
         return id;
