@@ -3,9 +3,12 @@ package com.aniket.controller;
 
 import com.aniket.Service.CustomeUserDetailsService;
 import com.aniket.config.JwtProvider;
+import com.aniket.model.TwoFactorOTP;
 import com.aniket.model.User;
 import com.aniket.repository.UserRepository;
 import com.aniket.response.AuthResponse;
+import com.aniket.service.TwoFactorOtpService;
+import com.aniket.utils.OtpUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,11 +25,13 @@ public class AuthController {
     UserRepository userRepository ;
     private JwtProvider jwtProvider;
     private CustomeUserDetailsService customeUserDetailsService;
+    private TwoFactorOtpService twoFactorOtpService;
 
-    public AuthController(UserRepository userRepository, JwtProvider jwtProvider, CustomeUserDetailsService customeUserDetailsService) {
+    public AuthController(UserRepository userRepository, JwtProvider jwtProvider, CustomeUserDetailsService customeUserDetailsService, TwoFactorOtpService twoFactorOtpService) {
         this.userRepository = userRepository;
         this.jwtProvider = jwtProvider;
         this.customeUserDetailsService = customeUserDetailsService;
+        this.twoFactorOtpService = twoFactorOtpService;
     }
 
     @PostMapping("/signup")
@@ -75,6 +80,29 @@ public class AuthController {
 
         String jwt = jwtProvider.generateToken(auth);
 
+        User authUser = userRepository.findByEmail(userName);
+
+        if(user.getTwoFactorAuth().isEnabled()){
+            AuthResponse res = new AuthResponse();
+            res.setMessage("Two Factor auth is eneabled");
+
+            res.setTwoFactorAuthEnabled(true);
+            String otp = OtpUtils.generateOTP();
+
+            TwoFactorOTP oldTwoFactorOTP =twoFactorOtpService.findByUser(authUser.getId());
+
+            if(oldTwoFactorOTP != null){
+                twoFactorOtpService.deleteTwoFactorOtp(oldTwoFactorOTP);
+
+            }
+             TwoFactorOTP newTwoFactorOTP = twoFactorOtpService.createTwoFactorOtp(
+                     authUser,otp,jwt
+             );
+
+
+            res.setSession(newTwoFactorOTP.getId());
+            return new ResponseEntity<>(res, HttpStatus.ACCEPTED);
+        }
         AuthResponse res = new AuthResponse();
         res.setJwt(jwt);
 
