@@ -2,6 +2,7 @@ package com.aniket.Service;
 
 import com.aniket.model.User;
 import com.aniket.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -15,6 +16,7 @@ import java.util.List;
 @Service
 public class CustomeUserDetailsService implements UserDetailsService {
 
+    @Autowired
     private UserRepository userRepository;
 
     public CustomeUserDetailsService(UserRepository userRepository) {
