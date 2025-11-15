@@ -1,9 +1,11 @@
 package com.aniket.controller;
 
 
+import com.aniket.model.Order;
 import com.aniket.model.User;
 import com.aniket.model.Wallet;
 import com.aniket.model.WalletTransaction;
+import com.aniket.service.OrderService;
 import com.aniket.service.UserService;
 import com.aniket.service.WalletService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +24,7 @@ public class WalletController {
     private UserService userService;
 
     @Autowired
-
+    OrderService orderService;
 
     public ResponseEntity<Wallet> getUserWallet(
             @RequestHeader("Authorization") String jwt
@@ -57,8 +59,10 @@ public class WalletController {
             @PathVariable Long orderId
 
     )throws Exception{
-        User senderUser=userService.findUserProfileByJwt(jwt);
-        Order order = orderS
+        User user=userService.findUserProfileByJwt(jwt);
+        Order order = orderService.getOrderById(orderId);
+
+        Wallet wallet  = walletService.payOrderPayment(order , user);
         return  new ResponseEntity<>(wallet, HttpStatus.ACCEPTED);
     }
 }
