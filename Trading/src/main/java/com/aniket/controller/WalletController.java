@@ -1,17 +1,18 @@
 package com.aniket.controller;
 
 
-import com.aniket.model.Order;
-import com.aniket.model.User;
-import com.aniket.model.Wallet;
-import com.aniket.model.WalletTransaction;
+import com.aniket.model.*;
 import com.aniket.service.OrderService;
+import com.aniket.service.PaymentService;
 import com.aniket.service.UserService;
 import com.aniket.service.WalletService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.math.BigDecimal;
+import java.nio.file.Path;
 
 @RestController
 @RequestMapping("/api/wallet")
@@ -25,6 +26,9 @@ public class WalletController {
 
     @Autowired
     OrderService orderService;
+
+    @Autowired
+    PaymentService paymentService;
 
     public ResponseEntity<Wallet> getUserWallet(
             @RequestHeader("Authorization") String jwt
@@ -52,10 +56,36 @@ public class WalletController {
         return  new ResponseEntity<>(wallet, HttpStatus.ACCEPTED);
     }
 
-    @PutMapping("/api/wallet/order/{orderId}/pay")
-    public ResponseEntity<Wallet> payOrderPayment(
+    @PutMapping("/api/wallet/deposit")
+    public ResponseEntity<Wallet> addBalanceToWallet(
 
             @RequestHeader("Authorization") String jwt ,
+            @RequestParam(name = "order_id") Long orderId,
+            @RequestParam(name = "payment_id") String paymentId
+
+    )throws Exception{
+        User user=userService.findUserProfileByJwt(jwt);
+//        Order order = orderService.getOrderById(orderId);
+
+        Wallet wallet  = walletService.getUserWallet(user);
+        PaymentOrder order=paymentService.getPaymentOrderById(orderId);
+        Boolean status=paymentService.ProccedPaymentOrder (order, paymentId);
+
+        if(wallet.getBalance() == null){
+            wallet.setBalance(BigDecimal.valueOf(0));
+        }
+
+        if(status){
+            wallet= walletService.addBalance(wallet,order.getAmount());
+        }
+        return  new ResponseEntity<>(wallet, HttpStatus.ACCEPTED);
+    }
+
+    @PutMapping("/api/wallet/order/{orderId}/pay")
+    public ResponseEntity<Wallet> addMoneyToWallet(
+
+            @RequestHeader("Authorization") String jwt ,
+
             @PathVariable Long orderId
 
     )throws Exception{
