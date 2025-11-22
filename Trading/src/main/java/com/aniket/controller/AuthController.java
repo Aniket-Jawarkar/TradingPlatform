@@ -9,6 +9,7 @@ import com.aniket.repository.UserRepository;
 import com.aniket.response.AuthResponse;
 import com.aniket.service.EmailService;
 import com.aniket.service.TwoFactorOtpService;
+import com.aniket.service.WatchlistService;
 import com.aniket.utils.OtpUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -29,12 +30,16 @@ public class AuthController {
     private TwoFactorOtpService twoFactorOtpService;
     private EmailService emailService;
 
-    public AuthController(UserRepository userRepository, JwtProvider jwtProvider, CustomeUserDetailsService customeUserDetailsService, TwoFactorOtpService twoFactorOtpService, EmailService emailService) {
+    private WatchlistService watchlistService;
+
+
+    public AuthController(UserRepository userRepository, JwtProvider jwtProvider, CustomeUserDetailsService customeUserDetailsService, TwoFactorOtpService twoFactorOtpService, EmailService emailService,WatchlistService watchlistService) {
         this.userRepository = userRepository;
         this.jwtProvider = jwtProvider;
         this.customeUserDetailsService = customeUserDetailsService;
         this.twoFactorOtpService = twoFactorOtpService;
         this.emailService = emailService;
+        this.watchlistService = watchlistService;
     }
 
     @PostMapping("/signup")
@@ -53,6 +58,9 @@ public class AuthController {
         newUser.setFullName(user.getFullName());
         newUser.setPassword(user.getPassword());
         User savedUser = userRepository.save(newUser);
+
+        watchlistService.createWatchlist(savedUser);
+
         Authentication auth =
                 new UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassword());
         SecurityContextHolder.getContext().setAuthentication(auth);
