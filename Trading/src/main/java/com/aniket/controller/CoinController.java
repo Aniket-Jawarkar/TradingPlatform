@@ -27,7 +27,7 @@ public class CoinController {
 
     @GetMapping
     ResponseEntity<List<Coin>> getCoinList(
-            @RequestParam("page") int page
+            @RequestParam(required = false,name = "page") int page
     ) throws Exception {
         List<Coin> coins = coinService.getCoinList(page);
 
