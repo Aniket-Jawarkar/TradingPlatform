@@ -4,11 +4,13 @@ package com.aniket.model;
 import com.aniket.domain.OrderStatus;
 import com.aniket.domain.OrderType;
 import jakarta.persistence.*;
+import jdk.jfr.Name;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
+@Table(name = "orders")
 public class Order {
 
 
